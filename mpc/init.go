@@ -126,7 +126,6 @@ func Init(isServer bool) {
 	}
 }
 
-// InitConfig init mpc config
 func InitConfig(mpcParams *params.MPCConfig, isServer bool) *Config {
 	c := newConfig()
 

@@ -14,6 +14,7 @@ import (
 	"github.com/anyswap/CrossChain-Router/v3/tokens"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/config"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/eth"
+	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/near"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/template"
 	"github.com/urfave/cli/v2"
 )
@@ -76,6 +77,8 @@ func initRouter() {
 	switch testCfg.Module {
 	case "eth":
 		bridge = eth.NewCrossChainBridge()
+	case "near":
+		bridge = near.NewCrossChainBridge()
 	case "template":
 		bridge = template.NewCrossChainBridge()
 	default:
@@ -165,6 +168,8 @@ func process(opts map[string]string) error {
 	}
 	registerOK := false
 	infos, errs := bridge.RegisterSwap(txid, registerArgs)
+	log.Info("RegisterSwap res", "len", len(infos), "swapInfo", infos[0])
+
 	for i, err := range errs {
 		if err == nil && infos[i] != nil {
 			registerOK = true

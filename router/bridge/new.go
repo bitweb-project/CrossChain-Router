@@ -14,6 +14,8 @@ func NewCrossChainBridge(chainID *big.Int) tokens.IBridge {
 	switch {
 	case ripple.SupportsChainID(chainID):
 		return ripple.NewCrossChainBridge()
+	case near.SupportsChainID(chainID):
+		return near.NewCrossChainBridge()
 	case chainID.Sign() <= 0:
 		log.Fatal("wrong chainID", "chainID", chainID)
 	default:

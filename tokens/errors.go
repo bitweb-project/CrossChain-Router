@@ -42,6 +42,13 @@ var (
 	ErrNoEnoughReserveBudget = errors.New("no enough reserve budget")
 	ErrTxWithNoPayment       = errors.New("tx with no payment")
 	ErrTxIsNotValidated      = errors.New("tx is not validated")
+	ErrGetUnderlying         = errors.New("get underlying address error")
+	ErrGetMPC                = errors.New("get mpc address error")
+	ErrTokenDecimals         = errors.New("get token decimals error")
+	ErrGetAccountNonce       = errors.New("get account nonce error")
+	ErrGetLatestBlockNumber  = errors.New("get latest block number error")
+	ErrGetLatestBlockHash    = errors.New("get latest block hash error")
+	ErrBroadcastTx           = errors.New("broadcast tx error")
 	ErrPauseSwapInto         = errors.New("maintain: pause swap into")
 	ErrBuildTxErrorAndDelay  = errors.New("[build tx error]")
 
