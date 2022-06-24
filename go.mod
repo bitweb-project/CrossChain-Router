@@ -4,9 +4,12 @@ go 1.15
 
 require (
 	github.com/BurntSushi/toml v1.1.0
+	github.com/anyswap/CrossChain-Bridge v0.3.9
 	github.com/btcsuite/btcd v0.22.0-beta
 	github.com/deckarep/golang-set v1.8.0
 	github.com/didip/tollbooth/v6 v6.1.2
+	github.com/fbsobreira/gotron-sdk v0.0.0-20211102183839-58a64f4da5f4
+	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/rpc v1.2.0

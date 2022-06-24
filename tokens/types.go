@@ -132,12 +132,12 @@ type SwapTxInfo struct {
 
 // TxStatus struct
 type TxStatus struct {
-	Sender        string      `json:"sender,omitempty"`
-	Receipt       interface{} `json:"receipt,omitempty"`
-	Confirmations uint64      `json:"confirmations"`
-	BlockHeight   uint64      `json:"blockHeight"`
-	BlockHash     string      `json:"blockHash"`
-	BlockTime     uint64      `json:"blockTime"`
+	Receipt            interface{} `json:"receipt,omitempty"`
+	CustomeCheckStable func(uint64) bool
+	Confirmations      uint64 `json:"confirmations"`
+	BlockHeight        uint64 `json:"block_height"`
+	BlockHash          string `json:"block_hash"`
+	BlockTime          uint64 `json:"block_time"`
 }
 
 // StatusInterface interface
@@ -201,12 +201,14 @@ type BuildTxArgs struct {
 
 // AllExtras struct
 type AllExtras struct {
-	EthExtra   *EthExtraArgs `json:"ethExtra,omitempty"`
-	ReplaceNum uint64        `json:"replaceNum,omitempty"`
-	Sequence   *uint64       `json:"sequence,omitempty"`
-	Fee        *string       `json:"fee,omitempty"`
-	Gas        *uint64       `json:"gas,omitempty"`
-	BlockHash  *string       `json:"blockHash,omitempty"`
+	EthExtra  *EthExtraArgs  `json:"ethExtra,omitempty"`
+	TronExtra *TronExtraArgs `json:"tronExtra,omitempty"`
+
+	ReplaceNum uint64  `json:"replaceNum,omitempty"`
+	Sequence   *uint64 `json:"sequence,omitempty"`
+	Fee        *string `json:"fee,omitempty"`
+	Gas        *uint64 `json:"gas,omitempty"`
+	BlockHash  *string `json:"blockHash,omitempty"`
 }
 
 // EthExtraArgs struct
@@ -217,6 +219,14 @@ type EthExtraArgs struct {
 	GasFeeCap *big.Int `json:"gasFeeCap,omitempty"`
 	Nonce     *uint64  `json:"nonce,omitempty"`
 	Deadline  int64    `json:"deadline,omitempty"`
+}
+
+// TronExtraArgs struct
+type TronExtraArgs struct {
+	Selector string `json:"selector,omitempty"`
+	Params   string `json:"params,omitempty"`
+	RawTx    string `json:"rawTx,omitempty"`
+	Deadline int64  `json:"deadline,omitempty"`
 }
 
 // GetReplaceNum get rplace swap count
