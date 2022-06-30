@@ -12,6 +12,8 @@ import (
 	"github.com/anyswap/CrossChain-Router/v3/router"
 	rpcserver "github.com/anyswap/CrossChain-Router/v3/rpc/server"
 	"github.com/anyswap/CrossChain-Router/v3/tokens"
+
+	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/btc"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/config"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/eth"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/tests/near"
@@ -75,6 +77,8 @@ func initRouter() {
 	params.SetDebugMode(testCfg.IsDebugMode)
 
 	switch testCfg.Module {
+	case "btc":
+		bridge = btc.NewCrossChainBridge()
 	case "eth":
 		bridge = eth.NewCrossChainBridge()
 	case "near":

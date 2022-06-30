@@ -5,14 +5,14 @@ Identifier = "routerswap#test"
 SwapType = "erc20swap"
 
 # test module name
-Module = "near"
+Module = "btc"
 
 # rpc listen port
 Port = 11556
 
 # use private key instead of mpc signing
-SignWithPrivateKey = "ed25519:2eFH8pYc9xLiDvaqCL62XLXSQZNxD7uoGoq31mG1zQfE7DbV9gSXKG3qhxpgwWoii75T4MKqHKvy7B51VAsaAjpu"
-SignerAddress = "userdemo.testnet"
+SignWithPrivateKey = "cQe83zjzDkDZHg4fN5BK9b9PY4TNnfnDh2mzCZL3Dp333ripJTEX"
+SignerAddress = "mw3Vr9dERAsJZZXEF9Xbi4tuB6xCAp3L2r"
 
 # allow call into router from contract
 AllowCallByContract = false
@@ -21,26 +21,26 @@ AllowCallByContract = false
 IsDebugMode = true
 
 # all chain ids (pass 'miss token config' checking)
-AllChainIDs = ["1001313161555", "1337"]
+AllChainIDs = ["1000004346948", "4"]
 
 [Gateway]
-APIAddress = ["https://archival-rpc.testnet.near.org"]
+APIAddress = ["https://blockstream.info/testnet/api"]
 
 # chain config
 [Chain]
-BlockChain = "near"
-ChainID = "1001313161555"
+BlockChain = "btc"
+ChainID = "1000004346948"
 Confirmations = 1
 InitialHeight = 0
-RouterContract = "r2.crossdemo.testnet"
+RouterContract = "0x92c079d3155c2722dbf7e65017a5baf9cd15561c"
 
 # token config
 [Token]
-ContractAddress = "a1.crossdemo.testnet"
+ContractAddress = "0x49974c3c99f4e74d08845c31d3f4f16fdc264ebd"
 ContractVersion = 6
-Decimals = 24
-RouterContract = "r2.crossdemo.testnet"
-TokenID = "anyBNB"
+Decimals = 8
+RouterContract = "0x92c079d3155c2722dbf7e65017a5baf9cd15561c"
+TokenID = "btc"
 Underlying = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c"
 
 [Swap]

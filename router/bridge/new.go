@@ -5,6 +5,7 @@ import (
 
 	"github.com/anyswap/CrossChain-Router/v3/log"
 	"github.com/anyswap/CrossChain-Router/v3/tokens"
+	"github.com/anyswap/CrossChain-Router/v3/tokens/btc"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/eth"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/near"
 	"github.com/anyswap/CrossChain-Router/v3/tokens/ripple"
@@ -15,6 +16,8 @@ import (
 // NewCrossChainBridge new bridge
 func NewCrossChainBridge(chainID *big.Int) tokens.IBridge {
 	switch {
+	case btc.SupportsChainID(chainID):
+		return btc.NewCrossChainBridge()
 	case tron.SupportsChainID(chainID):
 		return tron.NewCrossChainBridge()
 	case ripple.SupportsChainID(chainID):
