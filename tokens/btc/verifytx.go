@@ -76,7 +76,7 @@ func (b *Bridge) verifySwapoutTx(txHash string, logIndex int, allowUnstable bool
 	}
 	swapInfo.ERC20SwapInfo.TokenID = tokenCfg.TokenID
 
-	receipts, err := b.getSwapTxReceipt(swapInfo, true)
+	receipts, err := b.getSwapTxReceipt(swapInfo, allowUnstable)
 	if err != nil {
 		return swapInfo, err
 	}
@@ -130,11 +130,27 @@ func (b *Bridge) checkTxStatus(tx *ElectTx, swapInfo *tokens.SwapTxInfo, allowUn
 	} else if *tx.Locktime != 0 {
 		// tx with locktime should be on chain, prvent DDOS attack
 		return tokens.ErrTxNotStable
-	}//else if !*txStatus.Confirmed {
-		//return tokens.ErrTxNotStable
-	//}
+	}
 	if txStatus.BlockTime != nil {
 		swapInfo.Timestamp = *txStatus.BlockTime // Timestamp
+	}
+	if !allowUnstable {
+		if !*txStatus.Confirmed || swapInfo.Height == 0 {
+			return tokens.ErrTxNotStable
+		}
+
+		latest, err := b.GetLatestBlockNumber()
+		if err != nil {
+			return err
+		}
+
+		if latest < swapInfo.Height+b.GetChainConfig().Confirmations {
+			return tokens.ErrTxNotStable
+		}
+
+		if latest < b.ChainConfig.InitialHeight {
+			return tokens.ErrTxBeforeInitialHeight
+		}
 	}
 	return nil
 }

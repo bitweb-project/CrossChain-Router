@@ -1,6 +1,8 @@
 package btc
 
 import (
+	"fmt"
+
 	"github.com/anyswap/CrossChain-Router/v3/common"
 )
 
@@ -24,11 +26,14 @@ func (b *Bridge) PublicKeyToAddress(pubKey string) (string, error) {
 	return address.EncodeAddress(), nil
 }
 
-// todo： read from config
+// VerifyPubKey verify address and public key is matched
 func (b *Bridge) VerifyPubKey(address, pubKey string) error {
 	wantAddr, err := b.PublicKeyToAddress(pubKey)
-	if err != nil || wantAddr != address {
+	if err != nil {
 		return err
+	}
+	if wantAddr != address {
+		return fmt.Errorf("address %v and public key %v mismatch", address, pubKey)
 	}
 	return nil
 }

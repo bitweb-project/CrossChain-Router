@@ -4,7 +4,10 @@ import (
 	"sort"
 
 	"github.com/anyswap/CrossChain-Router/v3/rpc/client"
+	"github.com/anyswap/CrossChain-Router/v3/tokens"
 )
+
+var wrapRPCQueryError = tokens.WrapRPCQueryError
 
 // PostTransaction call post to /tx
 func PostTransaction(url, txHex string) (txHash string, err error) {
@@ -13,7 +16,7 @@ func PostTransaction(url, txHex string) (txHash string, err error) {
 	if err == nil {
 		return txHash, nil
 	}
-	return "", err
+	return "", wrapRPCQueryError(err, "PostTransaction")
 }
 
 // GetTransactionByHash get tx by hash
@@ -25,7 +28,7 @@ func GetTransactionByHash(url, txHash string) (*ElectTx, error) {
 	if err == nil {
 		return &result, nil
 	}
-	return nil, err
+	return nil, wrapRPCQueryError(err, "GetTransactionByHash", txHash)
 }
 
 func EstimateFeePerKb(url string, blocks int) (fee int64, err error) {
@@ -33,7 +36,7 @@ func EstimateFeePerKb(url string, blocks int) (fee int64, err error) {
 	restApi := url + "/fee-estimates"
 	err = client.RPCGet(&result, restApi)
 	if err != nil {
-		return 0, err
+		return 0, wrapRPCQueryError(err, "EstimateFeePerKb")
 	}
 	return int64(result[blocks] * 1000), nil
 }
@@ -45,7 +48,7 @@ func FindUtxos(url string, addr string) (result []*ElectUtxo, err error) {
 		sort.Sort(SortableElectUtxoSlice(result))
 		return result, nil
 	}
-	return nil, err
+	return nil, wrapRPCQueryError(err, "FindUtxos", addr)
 }
 
 // GetElectTransactionStatus call /tx/{txHash}/status
@@ -55,7 +58,7 @@ func GetElectTransactionStatus(url, txHash string) (result *ElectTxStatus, err e
 	if err == nil {
 		return result, nil
 	}
-	return nil, err
+	return nil, wrapRPCQueryError(err, "GetElectTransactionStatus", txHash)
 }
 
 func GetLatestBlockNumber(url string) (result uint64, err error) {
@@ -64,5 +67,5 @@ func GetLatestBlockNumber(url string) (result uint64, err error) {
 	if err == nil {
 		return result, nil
 	}
-	return 0, err
+	return 0, wrapRPCQueryError(err, "GetLatestBlockNumber")
 }
