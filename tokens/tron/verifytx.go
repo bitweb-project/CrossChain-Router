@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
-	proto "github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/anyswap/CrossChain-Router/v3/log"
 	"github.com/anyswap/CrossChain-Router/v3/tokens"
@@ -19,6 +19,7 @@ import (
 // GetTransactionStatus returns tx status
 func (b *Bridge) GetTransactionStatus(txHash string) (status *tokens.TxStatus, err error) {
 	status = &tokens.TxStatus{}
+	tx, err := b.GetTransaction(txHash)
 	rpcError := &RPCError{[]error{}, "GetTransactionStatus"}
 	defer func() {
 		if r := recover(); r != nil {
@@ -28,9 +29,9 @@ func (b *Bridge) GetTransactionStatus(txHash string) (status *tokens.TxStatus, e
 	txinfo := make(map[string]interface{})
 	for _, endpoint := range b.GatewayConfig.APIAddress {
 		apiurl := strings.TrimSuffix(endpoint, "/") + `/walletsolidity/gettransactioninfobyid`
-		res, err := post(apiurl, `{"value":"`+txHash+`"}`)
-		if err != nil {
-			panic(err)
+		res, err1 := post(apiurl, `{"value":"`+txHash+`"}`)
+		if err1 != nil {
+			panic(err1)
 		}
 		err = json.Unmarshal(res, &txinfo)
 		if err != nil {
@@ -46,7 +47,7 @@ func (b *Bridge) GetTransactionStatus(txHash string) (status *tokens.TxStatus, e
 		}
 	}()
 
-	if txinfo["result"].(string) != "SUCCESS" {
+	if txinfo["receipt"].(map[string]interface{})["result"].(string) != "SUCCESS" {
 		return nil, errors.New("tron tx not success")
 	}
 	cres := txinfo["contractResult"].([]interface{})
@@ -61,6 +62,7 @@ func (b *Bridge) GetTransactionStatus(txHash string) (status *tokens.TxStatus, e
 	}
 
 	status.Receipt = txinfo
+	status.Receipt.(map[string]interface{})["tx"] = tx
 	status.BlockHeight = uint64(txinfo["blockNumber"].(float64))
 	status.BlockTime = uint64(txinfo["blockTimeStamp"].(float64)) / 1000
 
@@ -116,9 +118,12 @@ func CalcTxHash(tx *core.Transaction) string {
 	}
 
 	h256h := sha256.New()
-	h256h.Write(rawData)
+	_, err = h256h.Write(rawData)
+	if err != nil {
+		return ""
+	}
 	hash := h256h.Sum(nil)
-	txhash := common.ToHex(hash)
+	txhash := common.BytesToHexString(hash)
 
 	txhash = strings.TrimPrefix(txhash, "0x")
 	return txhash

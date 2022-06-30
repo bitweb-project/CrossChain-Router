@@ -141,7 +141,7 @@ func (b *Bridge) GetOwnerAddress(contractAddr string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return common.BytesToAddress(common.GetData(common.FromHex(res), 0, 32)).LowerHex(), nil
+	return common.BytesToAddress(common.GetData(common.FromHex(res), 32, 32)).LowerHex(), nil
 }
 
 // IsMinter call "isMinter(address)"

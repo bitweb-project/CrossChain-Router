@@ -40,6 +40,16 @@ func NewCrossChainBridge() *Bridge {
 	}
 }
 
+// SupportsChainID supports chainID
+func SupportsChainID(chainID *big.Int) bool {
+	switch chainID.Uint64() {
+	case TronMainnetChainID, TronShastaChainID:
+		return true
+	default:
+		return false
+	}
+}
+
 // CustomConfig custom config
 type CustomConfig struct {
 	// some chain's rpc is slow and need config a longer rpc timeout
@@ -100,6 +110,18 @@ func (b *Bridge) InitGatewayConfig(chainID *big.Int) {
 	}
 	log.Infof("[%5v] lastest block number is %v", chainID, latestBlock)
 	log.Infof("[%5v] init gateway config success", chainID)
+}
+
+// SetTokenConfig set token config
+func (b *Bridge) SetTokenConfig(tokenAddr string, tokenCfg *tokens.TokenConfig) {
+	if tokenCfg == nil || !tokens.IsERC20Router() {
+		return
+	}
+
+	tokenCfg.ContractAddress = anyToEth(tokenCfg.ContractAddress)
+	tokenCfg.RouterContract = anyToEth(tokenCfg.RouterContract)
+	tokenAddr = anyToEth(tokenAddr)
+	b.CrossChainBridgeBase.SetTokenConfig(tokenAddr, tokenCfg)
 }
 
 // InitChainConfig impl
@@ -210,37 +232,6 @@ func (b *Bridge) ReloadChainConfig(chainID *big.Int) {
 	}
 	b.SetChainConfig(chainCfg)
 	log.Info("reload chain config success", "blockChain", chainCfg.BlockChain, "chainID", chainID)
-}
-
-func (b *Bridge) checkTokenMinter(routerContract string, tokenCfg *tokens.TokenConfig) (err error) {
-	if !tokenCfg.IsStandardTokenVersion() {
-		return nil
-	}
-	tokenAddr := tokenCfg.ContractAddress
-	var minterAddr string
-	var isMinter bool
-	switch tokenCfg.ContractVersion {
-	default:
-		isMinter, err = b.IsMinter(tokenAddr, routerContract)
-		if err != nil {
-			return err
-		}
-		if !isMinter {
-			return fmt.Errorf("%v is not minter", routerContract)
-		}
-		return nil
-	case 3:
-		minterAddr, err = b.GetVaultAddress(tokenAddr)
-	case 2, 1:
-		minterAddr, err = b.GetOwnerAddress(tokenAddr)
-	}
-	if err != nil {
-		return err
-	}
-	if common.HexToAddress(minterAddr) != common.HexToAddress(routerContract) {
-		return fmt.Errorf("minter mismatch, have '%v' config '%v'", minterAddr, routerContract)
-	}
-	return nil
 }
 
 // GetSignerChainID default way to get signer chain id

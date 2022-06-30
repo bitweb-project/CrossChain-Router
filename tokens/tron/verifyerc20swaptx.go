@@ -31,9 +31,6 @@ var (
 	LogAnySwapTradeTokensForTokensTopic = common.FromHex("0xfea6abdf4fd32f20966dff7619354cd82cd43dc78a3bee479f04c74dbfc585b3")
 	// LogAnySwapTradeTokensForNative(address[] path, address from, address to, uint amountIn, uint amountOutMin, uint fromChainID, uint toChainID);
 	LogAnySwapTradeTokensForNativeTopic = common.FromHex("0x278277e0209c347189add7bd92411973b5f6b8644f7ac62ea1be984ce993f8f4")
-
-	anySwapOutUnderlyingWithPermitFuncHash         = common.FromHex("0x8d7d3eea")
-	anySwapOutUnderlyingWithTransferPermitFuncHash = common.FromHex("0x1b91a934")
 )
 
 func (b *Bridge) verifyERC20SwapTx(txHash string, logIndex int, allowUnstable bool) (*tokens.SwapTxInfo, error) {
@@ -140,11 +137,9 @@ func (b *Bridge) checkERC20SwapInfo(swapInfo *tokens.SwapTxInfo) error {
 }
 
 func (b *Bridge) checkTxSuccess(swapInfo *tokens.SwapTxInfo, allowUnstable bool) (err error) {
-	itx, err := b.GetTransaction(swapInfo.Hash)
 	if err != nil {
 		return err
 	}
-	tx, _ := itx.(*core.Transaction)
 	txStatus, err := b.GetTransactionStatus(swapInfo.Hash)
 	if err != nil {
 		return err
@@ -159,6 +154,8 @@ func (b *Bridge) checkTxSuccess(swapInfo *tokens.SwapTxInfo, allowUnstable bool)
 	if txStatus.BlockHeight < b.ChainConfig.InitialHeight {
 		return tokens.ErrTxBeforeInitialHeight
 	}
+	receipt := txStatus.Receipt.(map[string]interface{})
+	tx := receipt["tx"].(*core.Transaction)
 
 	swapInfo.Height = txStatus.BlockHeight  // Height
 	swapInfo.Timestamp = txStatus.BlockTime // Timestamp
@@ -186,15 +183,15 @@ func (b *Bridge) checkTxSuccess(swapInfo *tokens.SwapTxInfo, allowUnstable bool)
 			return errors.New("tx inconsistent")
 		}
 		from := fmt.Sprintf("%v", tronaddress.Address(c.OwnerAddress))
-		contractAddress := fmt.Sprintf("%v", tronaddress.Address(c.ContractAddress))
-		if common.BytesToAddress(c.ContractAddress) == (common.Address{}) && !params.AllowCallByConstructor() {
+		contractAddress := anyToEth(tronaddress.Address(c.ContractAddress).String())
+		if contractAddress == "" && !params.AllowCallByConstructor() {
 			return tokens.ErrTxWithWrongContract
 		} else {
 			swapInfo.TxTo = contractAddress
 		}
 		swapInfo.From = from
 	default:
-		errors.New("tron tx unknown error")
+		return errors.New("tron tx unknown error")
 	}
 
 	return nil
@@ -203,7 +200,7 @@ func (b *Bridge) checkTxSuccess(swapInfo *tokens.SwapTxInfo, allowUnstable bool)
 func (b *Bridge) checkCallByContract(swapInfo *tokens.SwapTxInfo) error {
 	txTo := swapInfo.TxTo
 	routerContract := b.GetRouterContract(swapInfo.ERC20SwapInfo.Token)
-	routerContract = anyToTron(routerContract)
+	routerContract = anyToEth(routerContract)
 	if routerContract == "" {
 		return tokens.ErrMissRouterInfo
 	}
@@ -263,7 +260,7 @@ func (b *Bridge) verifyERC20SwapTxLog(swapInfo *tokens.SwapTxInfo, rlog *types.R
 	if routerContract == "" {
 		return tokens.ErrMissRouterInfo
 	}
-	if !common.IsEqualIgnoreCase(rlog.Address.LowerHex(), routerContract) {
+	if !common.IsEqualIgnoreCase(rlog.Address.LowerHex(), anyToEth(routerContract)) {
 		log.Warn("router contract mismatch", "have", rlog.Address.LowerHex(), "want", routerContract)
 		return tokens.ErrTxWithWrongContract
 	}
@@ -284,11 +281,7 @@ func (b *Bridge) parseERC20SwapoutTxLog(swapInfo *tokens.SwapTxInfo, rlog *types
 	swapInfo.From = common.BytesToAddress(logTopics[2].Bytes()).LowerHex()
 	swapInfo.Bind = common.BytesToAddress(logTopics[3].Bytes()).LowerHex()
 	swapInfo.Value = common.GetBigInt(logData, 0, 32)
-	if params.IsUseFromChainIDInReceiptDisabled(b.ChainConfig.ChainID) {
-		swapInfo.FromChainID = b.ChainConfig.GetChainID()
-	} else {
-		swapInfo.FromChainID = common.GetBigInt(logData, 32, 32)
-	}
+	swapInfo.FromChainID = b.ChainConfig.GetChainID()
 	swapInfo.ToChainID = common.GetBigInt(logData, 64, 32)
 
 	tokenCfg := b.GetTokenConfig(erc20SwapInfo.Token)
@@ -446,7 +439,7 @@ func checkSwapTradePath(swapInfo *tokens.SwapTxInfo) error {
 		return tokens.ErrTxWithWrongPath
 	}
 	routerContract := dstBridge.GetRouterContract(multichainToken)
-	routerContract = anyToTron(routerContract)
+	routerContract = anyToEth(routerContract)
 	if routerContract == "" {
 		return tokens.ErrMissRouterInfo
 	}
