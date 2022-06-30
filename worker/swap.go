@@ -41,12 +41,9 @@ func StartSwapJob() {
 	// init all swap task queue
 	router.RouterBridges.Range(func(k, v interface{}) bool {
 		chainID := k.(string)
-
-		logWorker("swap", "init swap task queue", "chainID", chainID)
 		if _, exist := swapTaskQueues[chainID]; !exist {
 			swapTaskQueues[chainID] = fifo.NewQueue()
 		}
-
 		return true
 	})
 
@@ -142,6 +139,9 @@ func processRouterSwap(swap *mongodb.MgoSwap) (err error) {
 
 	res, err := mongodb.FindRouterSwapResult(fromChainID, txid, logIndex)
 	if err != nil {
+		if errors.Is(err, mongodb.ErrItemNotFound) {
+			_ = mongodb.UpdateRouterSwapStatus(fromChainID, txid, logIndex, mongodb.TxNotStable, now(), "")
+		}
 		return err
 	}
 
@@ -287,7 +287,7 @@ func startSwapConsumer(chainID string) {
 		}
 
 		if i%10 == 0 && taskQueue.Len() > 0 {
-			logWorker("doSwap", "tasks in queue", "chainID", chainID, "count", taskQueue.Len())
+			logWorker("doSwap", "tasks in swap queue", "chainID", chainID, "count", taskQueue.Len())
 		}
 		i++
 
@@ -370,7 +370,7 @@ func doSwap(args *tokens.BuildTxArgs) (err error) {
 	if err != nil {
 		logWorkerError("doSwap", "build tx failed", err, "fromChainID", fromChainID, "toChainID", toChainID, "txid", txid, "logIndex", logIndex)
 		if errors.Is(err, tokens.ErrBuildTxErrorAndDelay) {
-			_ = updateSwapTimestamp(fromChainID, txid, logIndex)
+			_ = updateSwapMemo(fromChainID, txid, logIndex, err.Error())
 		}
 		return err
 	}
@@ -467,7 +467,7 @@ func doSwapParallel(args *tokens.BuildTxArgs) (err error) {
 	if err != nil {
 		logWorkerError("doSwap", "build tx failed", err, "fromChainID", fromChainID, "toChainID", toChainID, "txid", txid, "logIndex", logIndex)
 		if errors.Is(err, tokens.ErrBuildTxErrorAndDelay) {
-			_ = updateSwapTimestamp(fromChainID, txid, logIndex)
+			_ = updateSwapMemo(fromChainID, txid, logIndex, err.Error())
 		}
 		return err
 	}
