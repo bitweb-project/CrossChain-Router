@@ -16,7 +16,7 @@ import (
 
 	tronaddress "github.com/fbsobreira/gotron-sdk/pkg/address"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes" //nolint
 )
 
 // router contract's log topics
@@ -178,7 +178,7 @@ func (b *Bridge) checkTxSuccess(swapInfo *tokens.SwapTxInfo, allowUnstable bool)
 	switch contract.Type {
 	case core.Transaction_Contract_TriggerSmartContract:
 		var c core.TriggerSmartContract
-		err := ptypes.UnmarshalAny(contract.GetParameter(), &c)
+		err := ptypes.UnmarshalAny(contract.GetParameter(), &c) //nolint
 		if err != nil {
 			return errors.New("tx inconsistent")
 		}

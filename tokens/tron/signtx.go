@@ -9,7 +9,7 @@ import (
 
 	tronaddress "github.com/fbsobreira/gotron-sdk/pkg/address"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes" //nolint
 	"google.golang.org/protobuf/proto"
 
 	"github.com/anyswap/CrossChain-Router/v3/common"
@@ -31,7 +31,7 @@ func (b *Bridge) verifyTransactionReceiver(rawTx interface{}, tokenID string) (*
 	contracts := rawdata.GetContract()
 
 	var contract core.TriggerSmartContract
-	err := ptypes.UnmarshalAny(contracts[0].GetParameter(), &contract)
+	err := ptypes.UnmarshalAny(contracts[0].GetParameter(), &contract) //nolint
 	if err != nil {
 		return nil, fmt.Errorf("[sign] Decode tron contract error: %v", err)
 	}
