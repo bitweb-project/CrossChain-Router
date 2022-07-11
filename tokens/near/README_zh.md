@@ -54,6 +54,9 @@ nep141是near上的同质化代币协议，即near上的erc20
 ④ nep141规定所有的transfer方法都必须支付1个yocto（1near=1*10**24yocto），即--depositYocto 1
 ***
 
+>3) 查询合约代码
+curl https://archival-rpc.testnet.near.org -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0", "id":1, "method":"query", "params":{"request_type":"view_code","block_id": block-height-or-hash,"account_id":"contract-account"}}'
+
 ## near部署步骤
 evm部署步骤这里不做赘述
 >1)安装rust环境
