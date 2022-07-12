@@ -52,10 +52,10 @@ nep141是near上的同质化代币协议，即near上的erc20
 ② nep141协议规定，所有接收代币的账户必须注册抵押，即storage_deposit方法质押0.0025个near在合约上，才能持有该合约的代币  
 ③ nep141的transfer有两种，ft_transfer转账，ft_transfer_call(接收方只能是合约)转账的同时，接收账户做逻辑处理  
 ④ nep141规定所有的transfer方法都必须支付1个yocto（1near=1*10**24yocto），即--depositYocto 1
-***
 
 >3) 查询合约代码
 curl https://archival-rpc.testnet.near.org -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0", "id":1, "method":"query", "params":{"request_type":"view_code","block_id": block-height-or-hash,"account_id":"contract-account"}}'
+***
 
 ## near部署步骤
 evm部署步骤这里不做赘述
